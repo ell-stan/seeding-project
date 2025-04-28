@@ -23,3 +23,29 @@ describe("GET /api", () => {
       });
   });
 });
+
+describe("GET /api/topics", () => {
+  test("200: Responds with an array of topic objects that have slug and description properties", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then(({ body: { topics } }) => {
+        expect(topics).toHaveLength(3);
+        topics.forEach((topic) => {
+          expect(topic).toHaveProperty("slug");
+          expect(topic).toHaveProperty("description");
+        });
+      });
+  });
+});
+
+describe("ANY /not-a-path", () => {
+  test("404: Responds with error message is path is not found", () => {
+    return request(app)
+      .get("/not-a-path")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Path does not exist");
+      });
+  });
+});
