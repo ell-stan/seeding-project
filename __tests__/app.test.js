@@ -45,7 +45,6 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body: { articles } }) => {
-        console.log(articles[0]);
         expect(articles).toHaveLength(13);
         expect;
         articles.forEach((article) => {
@@ -77,7 +76,6 @@ describe("GET /api/articles", () => {
       .get("/api/articles?sort_by=comment_count&order=asc")
       .expect(200)
       .then(({ body: { articles } }) => {
-        console.log(articles);
         expect(articles).toBeSortedBy("comment_count");
       });
   });
