@@ -46,7 +46,6 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles).toHaveLength(13);
-        expect;
         articles.forEach((article) => {
           expect(article).toStrictEqual({
             author: expect.any(String),
@@ -134,6 +133,54 @@ describe("GET /api/articles/:article_id", () => {
       .expect(404)
       .then(({ body: { msg } }) => {
         expect(msg).toEqual("Article not found");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Responds with an array of comments for the given article_id with the correct properties", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toHaveLength(11);
+        comments.forEach((comment) => {
+          expect(comment).toStrictEqual({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: expect.any(Number),
+          });
+        });
+      });
+  });
+
+  test("200: Comments are sorted by date in descending order if no query is provided", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body: { comments } }) => {
+        expect(comments).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+
+  test("400: Responds with an error message if article_id is invalid", () => {
+    return request(app)
+      .get("/api/articles/not-a-valid-id/comments")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Invalid article ID");
+      });
+  });
+
+  test("404: Responds with an error message if no comments exist for the given article_id", () => {
+    return request(app)
+      .get("/api/articles/10000/comments")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("No comments have been posted yet");
       });
   });
 });
