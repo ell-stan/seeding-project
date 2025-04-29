@@ -39,6 +39,68 @@ describe("GET /api/topics", () => {
   });
 });
 
+describe("GET /api/articles", () => {
+  test("200: Responds with an array of article objects with the correct properties", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        console.log(articles[0]);
+        expect(articles).toHaveLength(13);
+        expect;
+        articles.forEach((article) => {
+          expect(article).toStrictEqual({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+        });
+      });
+  });
+
+  test("200: Articles are sorted by date in descending order if no query is provided", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+
+  test("200: Responds with an array of article objects sorted correctly when a sort and order query are specified", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        console.log(articles);
+        expect(articles).toBeSortedBy("comment_count");
+      });
+  });
+
+  test("200: Responds with an array of article objects in descending order by default when only sort_by is specified", () => {
+    return request(app)
+      .get("/api/articles?sort_by=comment_count")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy("comment_count", { descending: true });
+      });
+  });
+
+  test("400: Responds with an error message if sort query is invalid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=invalid-query")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Invalid sort query");
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   test("200: Responds with an article object with all of its required properties when given a valid article ID", () => {
     return request(app)
@@ -59,7 +121,7 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 
-  test("400: Responds with error message if given an invalid article ID", () => {
+  test("400: Responds with an error message if given an invalid article ID", () => {
     return request(app)
       .get("/api/articles/not-a-valid-id")
       .expect(400)
@@ -68,7 +130,7 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 
-  test("404: Responds with error message if article of given valid id does not exist", () => {
+  test("404: Responds with an error message if article of given valid id does not exist", () => {
     return request(app)
       .get("/api/articles/10000")
       .expect(404)
@@ -79,7 +141,7 @@ describe("GET /api/articles/:article_id", () => {
 });
 
 describe("ANY /not-a-path", () => {
-  test("404: Responds with error message if path is not found", () => {
+  test("404: Responds with an error message if path is not found", () => {
     return request(app)
       .get("/not-a-path")
       .expect(404)
