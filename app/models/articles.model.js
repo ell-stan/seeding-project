@@ -32,7 +32,6 @@ exports.selectArticles = (sort_by, order) => {
     const articles = rows;
     articles.forEach((article) => {
       delete article.body;
-      comment_count = 0;
     });
     return articles;
   });
