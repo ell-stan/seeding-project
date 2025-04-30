@@ -249,6 +249,77 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: Responds with the updated article object with all of its required properties when given a valid article ID", () => {
+    const newVote = 5;
+    const patchInput = { inc_votes: newVote };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchInput)
+      .expect(200)
+      .then(({ body: { updatedArticle } }) => {
+        expect(updatedArticle).toStrictEqual({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 1,
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: 105,
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+
+  test("400: Responds with an error message if input does not contain the correct key", () => {
+    const newVote = 5;
+    const patchInput = { wrong_key: newVote };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchInput)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Missing 'inc_votes' key");
+      });
+  });
+
+  test("400: Responds with an error message if input does not contain the correct value type", () => {
+    const newVote = "not a number";
+    const patchInput = { inc_votes: newVote };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(patchInput)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid value for 'inc_votes': expected a number");
+      });
+  });
+
+  test("400: Responds with an error message if given article_id is invalid", () => {
+    const newVote = 5;
+    const patchInput = { inc_votes: newVote };
+    return request(app)
+      .patch("/api/articles/not-a-valid-id")
+      .send(patchInput)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid article ID");
+      });
+  });
+
+  test("404: Responds with an error message if provided article_id is valid, but the article does not exist", () => {
+    const newVote = 5;
+    const patchInput = { inc_votes: newVote };
+    return request(app)
+      .patch("/api/articles/10000")
+      .send(patchInput)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Article not found");
+      });
+  });
+});
+
 describe("ANY /not-a-path", () => {
   test("404: Responds with an error message if path is not found", () => {
     return request(app)
