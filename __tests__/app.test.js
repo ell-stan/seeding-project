@@ -186,7 +186,7 @@ describe("GET /api/articles/:article_id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
-  test.only("201: Responds with the posted comment object containing the correct properties if the username (author) exists", () => {
+  test("201: Responds with the posted comment object containing the correct properties if the username (author) exists", () => {
     const commentInput = { username: "butter_bridge", body: "testComment" };
     return request(app)
       .post("/api/articles/2/comments")
