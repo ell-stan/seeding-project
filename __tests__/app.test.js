@@ -185,6 +185,70 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Responds with the posted comment object containing the correct properties if the username (author) exists", () => {
+    const commentInput = { username: "butter_bridge", body: "testComment" };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(commentInput)
+      .expect(201)
+      .then(({ body: { comment } }) => {
+        expect(comment).toStrictEqual({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          author: "butter_bridge",
+          body: "testComment",
+          article_id: expect.any(Number),
+        });
+      });
+  });
+
+  test("400: Responds with an error message if the provided input does not contain the correct keys", () => {
+    const commentInput = {
+      notAUsername: "butter_bridge",
+      notABody: "testComment",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(commentInput)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Missing fields: username, body");
+      });
+  });
+
+  test("400: Responds with an error message if the provided input has only one correct key", () => {
+    const commentInput = {
+      notAUsername: "butter_bridge",
+      body: "testComment",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(commentInput)
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Missing field: username");
+      });
+  });
+
+  test("404: Responds with an error message if the user does not exist", () => {
+    const commentInput = {
+      username: "testUser",
+      body: "testComment",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(commentInput)
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual(
+          "Username does not exist. Please create an account to post a comment"
+        );
+      });
+  });
+});
+
 describe("ANY /not-a-path", () => {
   test("404: Responds with an error message if path is not found", () => {
     return request(app)
