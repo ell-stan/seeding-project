@@ -329,7 +329,7 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-describe.only("DELETE /api/comments/:comment_id", () => {
+describe("DELETE /api/comments/:comment_id", () => {
   test("204: Responds with the status and no content", () => {
     return request(app)
       .delete("/api/comments/1")
@@ -356,9 +356,6 @@ describe.only("DELETE /api/comments/:comment_id", () => {
         expect(msg).toBe("Comment not found");
       });
   });
-  // error handling:
-  // invalid comment id
-  // comment does not exist
 });
 
 describe("ANY /not-a-path", () => {
