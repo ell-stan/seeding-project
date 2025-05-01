@@ -35,12 +35,13 @@ GROUP BY articles.article_id`;
   }
 
   // order query
-  if (order && validOrders.includes(order.toUpperCase())) {
+  if (order && !validOrders.includes(order.toUpperCase())) {
+    return Promise.reject({ status: 400, msg: "Invalid order query" });
+  } else if (order && validOrders.includes(order.toUpperCase())) {
     queryStr += ` ${order.toUpperCase()}`;
   } else queryStr += ` DESC`;
 
-  return db.query(queryStr).then(({ rows }) => {
-    const articles = rows;
+  return db.query(queryStr).then(({ rows: articles }) => {
     return articles;
   });
 };

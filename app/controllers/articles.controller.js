@@ -8,6 +8,23 @@ exports.getArticles = (req, res, next) => {
   const { sort_by } = req.query;
   const { order } = req.query;
 
+  const validQueryParams = ["sort_by", "order"];
+  const invalidParams = [];
+
+  Object.keys(req.query).forEach((key) => {
+    if (!validQueryParams.includes(key)) {
+      invalidParams.push(key);
+    }
+  });
+
+  if (invalidParams.length > 0) {
+    return res.status(400).send({
+      msg: `Invalid query parameter${
+        invalidParams.length > 1 ? "s" : ""
+      }: ${invalidParams.join(", ")}`,
+    });
+  }
+
   return selectArticles(sort_by, order)
     .then((articles) => {
       res.status(200).send({ articles });
