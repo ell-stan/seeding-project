@@ -96,6 +96,33 @@ describe("GET /api/articles", () => {
         expect(msg).toEqual("Invalid sort query");
       });
   });
+
+  test("400: Responds with an error message if order query is invalid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=votes&order=invalid-query")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Invalid order query");
+      });
+  });
+
+  test("400: Responds with an error message if one query parameter is misspelled", () => {
+    return request(app)
+      .get("/api/articles?szxort_by=votes&order=ASC")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Invalid query parameter: szxort_by");
+      });
+  });
+
+  test("400: Responds with an error message if both query parameters are misspelled", () => {
+    return request(app)
+      .get("/api/articles?szxort_by=votes&ordering=ASC")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toEqual("Invalid query parameters: szxort_by, ordering");
+      });
+  });
 });
 
 describe("GET /api/users", () => {
