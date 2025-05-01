@@ -5,8 +5,8 @@ const {
 } = require("../models/articles.model");
 
 exports.getArticles = (req, res, next) => {
-  const sort_by = req.query.sort_by;
-  const order = req.query.order;
+  const { sort_by } = req.query;
+  const { order } = req.query;
 
   return selectArticles(sort_by, order)
     .then((articles) => {
@@ -16,8 +16,13 @@ exports.getArticles = (req, res, next) => {
 };
 
 exports.getArticleById = (req, res, next) => {
-  const id = req.params.article_id;
-  return selectArticleById(id)
+  const { article_id } = req.params;
+
+  if (isNaN(article_id)) {
+    return res.status(400).send({ msg: "Invalid article ID" });
+  }
+
+  return selectArticleById(article_id)
     .then((article) => {
       res.status(200).send({ article });
     })
@@ -25,20 +30,20 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.patchArticleById = (req, res, next) => {
-  const id = req.params.article_id;
-  const newVote = req.body.inc_votes;
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
 
-  if (isNaN(id)) {
+  if (isNaN(article_id)) {
     return res.status(400).send({ msg: "Invalid article ID" });
-  } else if (!newVote) {
+  } else if (!inc_votes) {
     return res.status(400).send({ msg: "Missing 'inc_votes' key" });
-  } else if (isNaN(newVote)) {
+  } else if (isNaN(inc_votes)) {
     return res
       .status(400)
       .send({ msg: "Invalid value for 'inc_votes': expected a number" });
   }
 
-  return updateArticleById(id, newVote)
+  return updateArticleById(article_id, inc_votes)
     .then((updatedArticle) => {
       res.status(200).send({ updatedArticle });
     })

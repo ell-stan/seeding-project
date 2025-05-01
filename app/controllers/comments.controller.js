@@ -4,13 +4,18 @@ const {
 } = require("../models/comments.models.js");
 
 exports.getCommentsByArticleId = (req, res, next) => {
-  const id = req.params.article_id;
-  const sort_by = req.query.sort_by;
-  const order = req.query.order;
+  const { article_id } = req.params;
+  const { sort_by } = req.query;
+  const { order } = req.query;
 
-  return selectCommentsByArticleId(id, sort_by, order)
+  if (isNaN(article_id)) {
+    return res.status(400).send({ msg: "Invalid article ID" });
+  }
+
+  return selectCommentsByArticleId(article_id, sort_by, order)
     .then((comments) => {
-      res.status(200).send({ comments });
+      const status = comments.length === 0 ? 201 : 200;
+      res.status(status).send({ comments });
     })
     .catch(next);
 };

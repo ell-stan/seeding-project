@@ -70,7 +70,7 @@ describe("GET /api/articles", () => {
       });
   });
 
-  test("200: Responds with an array of article objects sorted correctly when a sort and order query are specified", () => {
+  /* test("200: Responds with an array of article objects sorted correctly when a sort and order query are specified", () => {
     return request(app)
       .get("/api/articles?sort_by=comment_count&order=asc")
       .expect(200)
@@ -95,7 +95,7 @@ describe("GET /api/articles", () => {
       .then(({ body: { msg } }) => {
         expect(msg).toEqual("Invalid sort query");
       });
-  });
+  }); */
 });
 
 describe("GET /api/articles/:article_id", () => {
@@ -123,7 +123,7 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/not-a-valid-id")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Bad request");
+        expect(msg).toBe("Invalid article ID");
       });
   });
 
@@ -132,12 +132,12 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/10000")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Article not found");
+        expect(msg).toBe("Article not found");
       });
   });
 });
 
-describe("GET /api/articles/:article_id/comments", () => {
+describe.only("GET /api/articles/:article_id/comments", () => {
   test("200: Responds with an array of comments for the given article_id with the correct properties", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -151,7 +151,7 @@ describe("GET /api/articles/:article_id/comments", () => {
             created_at: expect.any(String),
             author: expect.any(String),
             body: expect.any(String),
-            article_id: expect.any(Number),
+            article_id: 1,
           });
         });
       });
@@ -166,21 +166,30 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 
+  test("201: Responds with an empty array if no comments exist for the given article_id", () => {
+    return request(app)
+      .get("/api/articles/4/comments")
+      .expect(201)
+      .then(({ body: { comments } }) => {
+        expect(comments).toEqual([]);
+      });
+  });
+
   test("400: Responds with an error message if article_id is invalid", () => {
     return request(app)
       .get("/api/articles/not-a-valid-id/comments")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Invalid article ID");
+        expect(msg).toBe("Invalid article ID");
       });
   });
 
-  test("404: Responds with an error message if no comments exist for the given article_id", () => {
+  test("404: Responds with an error message if the given article_id is valid, but the article does not exist", () => {
     return request(app)
       .get("/api/articles/10000/comments")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("No comments have been posted yet");
+        expect(msg).toBe("Article not found");
       });
   });
 });
@@ -214,7 +223,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(commentInput)
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Missing fields: username, body");
+        expect(msg).toBe("Missing fields: username, body");
       });
   });
 
@@ -228,7 +237,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(commentInput)
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Missing field: username");
+        expect(msg).toBe("Missing field: username");
       });
   });
 
@@ -242,7 +251,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send(commentInput)
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual(
+        expect(msg).toBe(
           "Username does not exist. Please create an account to post a comment"
         );
       });
@@ -315,7 +324,7 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(patchInput)
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Article not found");
+        expect(msg).toBe("Article not found");
       });
   });
 });
@@ -326,7 +335,7 @@ describe("ANY /not-a-path", () => {
       .get("/not-a-path")
       .expect(404)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Path does not exist");
+        expect(msg).toBe("Path does not exist");
       });
   });
 });

@@ -1,13 +1,9 @@
 const db = require("../../db/connection.js");
 
-exports.selectCommentsByArticleId = (id, sort_by, order) => {
-  if (isNaN(id)) {
-    return Promise.reject({ status: 400, msg: "Invalid article ID" });
-  }
+exports.selectCommentsByArticleId = (article_id, sort_by, order) => {
+  let queryStr = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
 
-  let queryStr = `SELECT * FROM comments WHERE article_id = $1`;
-
-  const validSortQueries = [
+  /* const validSortQueries = [
     "comment_id",
     "article_id",
     "votes",
@@ -21,23 +17,27 @@ exports.selectCommentsByArticleId = (id, sort_by, order) => {
     return Promise.reject({ status: 400, msg: "Invalid sort query" });
   } else if (sort_by && validSortQueries.includes(sort_by)) {
     queryStr += ` ORDER BY ${sort_by}`;
-  } else {
-    queryStr += ` ORDER BY created_at`;
-  }
+  } else { 
+  queryStr += ` ORDER BY created_at`;
+  /* }
 
   // order query
   if (order && validOrders.includes(order.toUpperCase())) {
     queryStr += ` ${order.toUpperCase()}`;
-  } else queryStr += ` DESC`;
+  } else queryStr += ` DESC`; */
 
-  return db.query(queryStr, [id]).then(({ rows }) => {
-    if (rows.length === 0) {
-      return Promise.reject({
-        status: 404,
-        msg: "No comments have been posted yet",
-      });
+  return db.query(queryStr, [article_id]).then(({ rows: comments }) => {
+    if (comments.length === 0) {
+      return db
+        .query("SELECT * FROM articles WHERE article_id = $1", [article_id])
+        .then(({ rows: articles }) => {
+          if (articles.length === 0) {
+            return Promise.reject({ status: 404, msg: "Article not found" });
+          } else {
+            return [];
+          }
+        });
     } else {
-      const comments = rows;
       return comments;
     }
   });
