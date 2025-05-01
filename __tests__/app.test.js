@@ -137,7 +137,7 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 
-describe.only("GET /api/articles/:article_id/comments", () => {
+describe("GET /api/articles/:article_id/comments", () => {
   test("200: Responds with an array of comments for the given article_id with the correct properties", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -327,6 +327,38 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(msg).toBe("Article not found");
       });
   });
+});
+
+describe.only("DELETE /api/comments/:comment_id", () => {
+  test("204: Responds with the status and no content", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+
+  test("400: Responds with an error message when given an invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/not-a-valid-id")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid comment ID");
+      });
+  });
+
+  test("404: Responds with an error message if a given comment_id is valid but comment does not exist", () => {
+    return request(app)
+      .delete("/api/comments/10000")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Comment not found");
+      });
+  });
+  // error handling:
+  // invalid comment id
+  // comment does not exist
 });
 
 describe("ANY /not-a-path", () => {

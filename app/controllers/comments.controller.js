@@ -1,6 +1,7 @@
 const {
   selectCommentsByArticleId,
   insertCommentByArticleId,
+  deleteCommentById,
 } = require("../models/comments.models.js");
 
 exports.getCommentsByArticleId = (req, res, next) => {
@@ -40,5 +41,15 @@ exports.postCommentByArticleId = (req, res, next) => {
     .then((comment) => {
       res.status(201).send({ comment });
     })
+    .catch(next);
+};
+
+exports.deleteComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  if (isNaN(comment_id)) {
+    return res.status(400).send({ msg: "Invalid comment ID" });
+  }
+  return deleteCommentById(comment_id)
+    .then(() => res.status(204).send())
     .catch(next);
 };

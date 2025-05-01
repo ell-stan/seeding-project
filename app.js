@@ -10,6 +10,7 @@ const {
 const {
   getCommentsByArticleId,
   postCommentByArticleId,
+  deleteComment,
 } = require("./app/controllers/comments.controller.js");
 
 app.use(express.json());
@@ -29,6 +30,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
 
 app.patch("/api/articles/:article_id", patchArticleById);
+
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.all("/*splat", (req, res) => {
   res.status(404).send({ msg: "Path does not exist" });
