@@ -98,6 +98,34 @@ describe("GET /api/articles", () => {
   }); */
 });
 
+describe("GET /api/users", () => {
+  test("200: Responds with an array of user objects with the correct properties", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body: { users } }) => {
+        console.log(users);
+        expect(users).toHaveLength(4);
+        users.forEach((user) => {
+          expect(user).toStrictEqual({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
+      });
+  });
+
+  test("404: Responds with an error if the path name is spelled incorrectly", () => {
+    return request(app)
+      .get("/api/userz")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Path does not exist");
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   test("200: Responds with an article object with all of its required properties when given a valid article ID", () => {
     return request(app)
