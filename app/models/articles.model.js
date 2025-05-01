@@ -1,6 +1,6 @@
 const db = require("../../db/connection.js");
 
-exports.selectArticles = () => {
+exports.selectArticles = (sort_by, order) => {
   let queryStr = `SELECT 
   articles.article_id,
   articles.author,
@@ -14,7 +14,7 @@ FROM articles
 LEFT JOIN comments ON articles.article_id = comments.article_id
 GROUP BY articles.article_id`;
 
-  /* const validSortQueries = [
+  const validSortQueries = [
     "article_id",
     "author",
     "title",
@@ -31,13 +31,13 @@ GROUP BY articles.article_id`;
   } else if (sort_by && validSortQueries.includes(sort_by)) {
     queryStr += ` ORDER BY ${sort_by}`;
   } else {
-     */ queryStr += ` ORDER BY created_at`;
-  /* }
+    queryStr += ` ORDER BY created_at`;
+  }
 
   // order query
   if (order && validOrders.includes(order.toUpperCase())) {
     queryStr += ` ${order.toUpperCase()}`;
-  } else */ queryStr += ` DESC`;
+  } else queryStr += ` DESC`;
 
   return db.query(queryStr).then(({ rows }) => {
     const articles = rows;

@@ -70,7 +70,7 @@ describe("GET /api/articles", () => {
       });
   });
 
-  /* test("200: Responds with an array of article objects sorted correctly when a sort and order query are specified", () => {
+  test("200: Responds with an array of article objects sorted correctly when a sort and order query are specified", () => {
     return request(app)
       .get("/api/articles?sort_by=comment_count&order=asc")
       .expect(200)
@@ -95,7 +95,7 @@ describe("GET /api/articles", () => {
       .then(({ body: { msg } }) => {
         expect(msg).toEqual("Invalid sort query");
       });
-  }); */
+  });
 });
 
 describe("GET /api/users", () => {
@@ -104,7 +104,6 @@ describe("GET /api/users", () => {
       .get("/api/users")
       .expect(200)
       .then(({ body: { users } }) => {
-        console.log(users);
         expect(users).toHaveLength(4);
         users.forEach((user) => {
           expect(user).toStrictEqual({
