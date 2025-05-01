@@ -5,10 +5,10 @@ const {
 } = require("../models/articles.model");
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by } = req.query;
-  const { order } = req.query;
+  // const { sort_by } = req.query;
+  // const { order } = req.query;
 
-  return selectArticles(sort_by, order)
+  return selectArticles()
     .then((articles) => {
       res.status(200).send({ articles });
     })

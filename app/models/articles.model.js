@@ -1,6 +1,6 @@
 const db = require("../../db/connection.js");
 
-exports.selectArticles = (sort_by, order) => {
+exports.selectArticles = () => {
   let queryStr = `SELECT 
   articles.article_id,
   articles.author,
