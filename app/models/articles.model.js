@@ -1,19 +1,6 @@
 const db = require("../../db/connection.js");
 
-exports.selectArticles = (sort_by, order) => {
-  let queryStr = `SELECT 
-  articles.article_id,
-  articles.author,
-  articles.title,
-  articles.topic,
-  articles.created_at,
-  articles.votes,
-  articles.article_img_url,
-  COUNT(comments.article_id)::INT AS comment_count
-FROM articles
-LEFT JOIN comments ON articles.article_id = comments.article_id
-GROUP BY articles.article_id`;
-
+exports.selectArticles = (sort_by = "created_at", order = "DESC", topic) => {
   const validSortQueries = [
     "article_id",
     "author",
@@ -24,25 +11,58 @@ GROUP BY articles.article_id`;
     "comment_count",
   ];
   const validOrders = ["ASC", "DESC"];
+  const validTopicFilters = ["mitch", "cats", "paper"];
+  const queryValues = [];
+
+  let queryStr = `SELECT 
+  articles.article_id,
+  articles.author,
+  articles.title,
+  articles.topic,
+  articles.created_at,
+  articles.votes,
+  articles.article_img_url,
+  COUNT(comments.article_id)::INT AS comment_count
+FROM articles
+LEFT JOIN comments ON articles.article_id = comments.article_id`;
+
+  // topic filter
+  if (topic) {
+    queryStr += ` WHERE articles.topic = $1`;
+    queryValues.push(topic);
+  }
+
+  // grouping
+  queryStr += ` GROUP BY articles.article_id`;
 
   // sort query
   if (sort_by && !validSortQueries.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "Invalid sort query" });
-  } else if (sort_by && validSortQueries.includes(sort_by)) {
-    queryStr += ` ORDER BY ${sort_by}`;
-  } else {
-    queryStr += ` ORDER BY created_at`;
   }
 
   // order query
-  if (order && !validOrders.includes(order.toUpperCase())) {
+  const upperCaseOrder = order ? order.toUpperCase() : "DESC";
+  if (order && !validOrders.includes(upperCaseOrder)) {
     return Promise.reject({ status: 400, msg: "Invalid order query" });
-  } else if (order && validOrders.includes(order.toUpperCase())) {
-    queryStr += ` ${order.toUpperCase()}`;
-  } else queryStr += ` DESC`;
+  }
 
-  return db.query(queryStr).then(({ rows: articles }) => {
-    return articles;
+  // sorting
+  queryStr += ` ORDER BY ${sort_by} ${upperCaseOrder}`;
+
+  return db.query(queryStr, queryValues).then(({ rows }) => {
+    if (rows.length === 0 && topic) {
+      return db
+        .query(`SELECT * FROM topics WHERE slug = $1`, [topic])
+        .then(({ rows: topics }) => {
+          if (topics.length === 0) {
+            return Promise.reject({ status: 404, msg: "Topic not found" });
+          } else {
+            return [];
+          }
+        });
+    } // likely best to refactor this later into a reusable function checkTopicExists() and put into topics model
+
+    return rows;
   });
 };
 

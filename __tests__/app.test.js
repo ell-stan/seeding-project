@@ -88,12 +88,46 @@ describe("GET /api/articles", () => {
       });
   });
 
+  test("200: Responds with an array of article objects when topic query is provided, and is filtered correctly", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(12);
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("200: Responds with an array of article objects when topic query, sort and order query are provided, and returns the correct result", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch&sort_by=title&order=ASC")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toHaveLength(12);
+        expect(articles).toBeSortedBy("title");
+        articles.forEach((article) => {
+          expect(article.topic).toBe("mitch");
+        });
+      });
+  });
+
+  test("200: Responds with an empty array if topic exists, but has no articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toEqual([]);
+      });
+  });
+
   test("400: Responds with an error message if sort query is invalid", () => {
     return request(app)
       .get("/api/articles?sort_by=invalid-query")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Invalid sort query");
+        expect(msg).toBe("Invalid sort query");
       });
   });
 
@@ -102,7 +136,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles?sort_by=votes&order=invalid-query")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Invalid order query");
+        expect(msg).toBe("Invalid order query");
       });
   });
 
@@ -111,16 +145,54 @@ describe("GET /api/articles", () => {
       .get("/api/articles?szxort_by=votes&order=ASC")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Invalid query parameter: szxort_by");
+        expect(msg).toBe("Invalid query parameter: szxort_by");
       });
   });
 
-  test("400: Responds with an error message if both query parameters are misspelled", () => {
+  test("400: Responds with an error message if two query parameters are misspelled", () => {
     return request(app)
       .get("/api/articles?szxort_by=votes&ordering=ASC")
       .expect(400)
       .then(({ body: { msg } }) => {
-        expect(msg).toEqual("Invalid query parameters: szxort_by, ordering");
+        expect(msg).toBe("Invalid query parameters: szxort_by, ordering");
+      });
+  });
+
+  test("400: Responds with an error message if all query parameters are misspelled", () => {
+    return request(app)
+      .get("/api/articles?yopic=mitch&szxort_by=votes&ordering=ASC")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe(
+          "Invalid query parameters: yopic, szxort_by, ordering"
+        );
+      });
+  });
+
+  test("400: Responds with error message if topic format is invalid", () => {
+    return request(app)
+      .get("/api/articles?topic=!%^")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid topic format");
+      });
+  });
+
+  test("400: Responds with an error message if the provided topic is invalid, but sort & order queries are specified", () => {
+    return request(app)
+      .get("/api/articles?topic=invalid!£format&sort_by=votes&order=desc")
+      .expect(400)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid topic format");
+      });
+  });
+
+  test("404: Responds with an error message if the provided topic does not exist", () => {
+    return request(app)
+      .get("/api/articles?topic=not-a-topic")
+      .expect(404)
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Topic not found");
       });
   });
 });
