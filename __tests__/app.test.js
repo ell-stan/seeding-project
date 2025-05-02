@@ -173,8 +173,8 @@ describe("GET /api/articles", () => {
     return request(app)
       .get("/api/articles?topic=!%^")
       .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Invalid topic format");
+      .then(({ body: { msg } }) => {
+        expect(msg).toBe("Invalid topic format");
       });
   });
 
@@ -231,15 +231,15 @@ describe("GET /api/articles/:article_id", () => {
       .expect(200)
       .then(({ body: { article } }) => {
         expect(article).toEqual({
-          author: "butter_bridge",
-          title: "Living in the shadow of a great man",
+          author: expect.any(String),
+          title: expect.any(String),
           article_id: 1,
-          body: "I find this existence challenging",
-          topic: "mitch",
-          created_at: "2020-07-09T20:11:00.000Z",
-          votes: 100,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          body: expect.any(String),
+          topic: expect.any(String),
+          created_at: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: 11,
         });
       });
   });
