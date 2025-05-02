@@ -5,11 +5,15 @@ const {
 } = require("../models/articles.model");
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by } = req.query;
-  const { order } = req.query;
+  const { sort_by, order, topic } = req.query;
 
-  const validQueryParams = ["sort_by", "order"];
+  const validQueryParams = ["sort_by", "order", "topic"];
   const invalidParams = [];
+
+  const validTopicNameRegex = /^[a-zA-Z0-9\s-]+$/; // allows letters of either case, also allows numbers, hyphens, and spaces
+  if (topic && !validTopicNameRegex.test(topic)) {
+    return res.status(400).send({ msg: "Invalid topic format" });
+  }
 
   Object.keys(req.query).forEach((key) => {
     if (!validQueryParams.includes(key)) {
@@ -25,7 +29,7 @@ exports.getArticles = (req, res, next) => {
     });
   }
 
-  return selectArticles(sort_by, order)
+  return selectArticles(sort_by, order, topic)
     .then((articles) => {
       res.status(200).send({ articles });
     })
