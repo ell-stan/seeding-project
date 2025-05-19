@@ -13,6 +13,9 @@ const {
   postCommentByArticleId,
   deleteComment,
 } = require("./app/controllers/comments.controller.js");
+const cors = require("cors");
+
+app.use(cors());
 
 app.use(express.json());
 
